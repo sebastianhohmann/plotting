@@ -40,7 +40,8 @@ class CoefPlot(object):
         
         
     def grouped_dotplot(self, b, varname, groupname, err=None, figsize=(10,6),
-                        sort_groupname = False, zero_line=False):
+                        sort_groupname = False, zero_line=False, group_separators=True,
+                        legend_bbox=(0,-0.2)):
 
         if sort_groupname:
             df = self.df.sort_values(groupname, inplace=False, ascending=False)
@@ -66,11 +67,26 @@ class CoefPlot(object):
                        marker=markseq[ivar], 
                        color=colseq[ivar], label=var)
             
-        ax.set_yticks(np.arange(0, len(groups)*2, 2))
-        ax.set_yticklabels(mod_df[groupname], rotation=0)
+        ax.set_yticks(np.arange(0, len(groups)*2, 2), minor=False)
+        ax.set_yticklabels(mod_df[groupname], rotation=0, minor=False)
+        ax.yaxis.grid(False, which='major')
+
+        # tweak legend
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(reversed(handles), reversed(labels))
-       
+        ax.legend(reversed(handles), reversed(labels), loc='lower left',
+                  bbox_to_anchor=legend_bbox, ncol=2, frameon=True)
+
+        if zero_line:
+            ax.axvline(x=0, linestyle='--', color='black', linewidth=1)
+        
+        # change color if have white figure background
+        if group_separators:
+            for y in np.arange(1, (len(groups)-1)*2,2):
+                ax.axhline(y=y, linestyle='-', color='w', linewidth=1)
+
+        plt.show();
+
+
         
     def make_offset_grid(self, npoints):
         grid = np.arange(0.25, 0.25*(npoints//2 + 1), 0.25)
